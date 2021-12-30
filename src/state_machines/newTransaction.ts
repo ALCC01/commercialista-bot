@@ -3,7 +3,7 @@ import { ConditionPredicate, createMachine, interpret, assign } from 'xstate'
 import { CANCEL, CONFIRM, DONE } from '../consts'
 import { Posting, putTransaction, Transaction } from '../fava'
 import { CANCEL_KEYBOARD, CANCEL_OR_DONE_KEYBOARD, CONFIRM_KEYBOARD, DEFAULT_KEYBOARD, NO_KEYBOARD, PARSE_MK } from '../markup'
-import { formatDate, isAmount, parseAmount } from '../utils'
+import { formatDate, isAmount, parseAmount, escape } from '../utils'
 
 type Context = {
   id: number
@@ -149,7 +149,7 @@ export default (msg: Message, client: TelegramBot) => {
 function confirmTransaction ({ payee, narration, postings }: Transaction) {
   let r = `🧾 ${payee ? `*${escape(payee!)}* ${escape(narration)}` : `*${escape(narration)}*`}\n\n`
   r += postings
-    .map(({ account, amount }) => `_${escape(account)}_\`\t${amount}\``)
+    .map(({ account, amount }) => `_${escape(account)}_\`\t${escape(amount)}\``)
     .join('\n')
   r += '\n*Confirm?*'
 
