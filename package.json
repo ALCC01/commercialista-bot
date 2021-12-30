@@ -1,0 +1,43 @@
+{
+  "name": "commercialista-bot",
+  "version": "0.0.1",
+  "description": "A little bean-counting minion",
+  "main": "src/app.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "fmt": "eslint --ext=js,ts --fix . ",
+    "lint": "eslint --ext=js,ts . ",
+    "start": "node build/app.js",
+    "build": "tsc src/app.ts",
+    "dev": "ts-node src/app.ts",
+    "watch": "nodemon --watch './**/*' --ext 'js,ts,json' --exec 'npm run dev'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ALCC01/commercialista-bot.git"
+  },
+  "author": "",
+  "license": "AGPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/ALCC01/commercialista-bot/issues"
+  },
+  "homepage": "https://github.com/ALCC01/commercialista-bot#readme",
+  "private": true,
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.8.1",
+    "@typescript-eslint/parser": "^5.8.1",
+    "eslint": "^7.32.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^5.2.0",
+    "nodemon": "^2.0.15",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.5.4"
+  },
+  "dependencies": {
+    "@types/node-telegram-bot-api": "^0.53.3",
+    "dotenv": "^10.0.0",
+    "node-telegram-bot-api": "^0.56.0"
+  }
+}
