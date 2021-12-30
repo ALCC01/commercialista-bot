@@ -1,5 +1,5 @@
 import TelegramBot, { Message } from 'node-telegram-bot-api'
-import { ActionFunctionMap, ConditionPredicate, createMachine, interpret } from 'xstate'
+import { ConditionPredicate, createMachine, interpret } from 'xstate'
 import { CANCEL, CONFIRM, DONE } from '../consts'
 import { Posting, Transaction } from '../fava'
 import { CANCEL_KEYBOARD, CANCEL_OR_DONE_KEYBOARD, CONFIRM_KEYBOARD, DEFAULT_KEYBOARD, NO_KEYBOARD, PARSE_MK } from '../markup'
@@ -108,8 +108,8 @@ const machine = createMachine<Context, Event>({
         ANSWER: [
           {
             cond: 'isConfirm',
-            actions: ({ client, id, final}) => {
-              client.sendMessage(id, `✅ All done!`, DEFAULT_KEYBOARD)
+            actions: ({ client, id, final }) => {
+              client.sendMessage(id, '✅ All done!', DEFAULT_KEYBOARD)
             },
             target: 'done'
           },
@@ -145,7 +145,7 @@ export default (msg: Message, client: TelegramBot) => {
 function confirmTransaction ({ payee, narration, postings }: Transaction) {
   let r = `🧾 ${payee ? `*${escape(payee!)}* ${escape(narration)}` : `*${escape(narration)}*`}\n\n`
   r += postings
-    .map(({account, amount}) => `_${escape(account)}_\`\t${amount}\``)
+    .map(({ account, amount }) => `_${escape(account)}_\`\t${amount}\``)
     .join('\n')
   r += '\n*Confirm?*'
 

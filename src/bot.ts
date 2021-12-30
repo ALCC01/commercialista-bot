@@ -34,7 +34,7 @@ export default class Bot {
       }
 
       if (this._machines[msg.chat.id]) {
-        let state = this._machines[msg.chat.id].send({ type: 'ANSWER', msg })
+        const state = this._machines[msg.chat.id].send({ type: 'ANSWER', msg })
         if (state.done) this._machines[msg.chat.id] = undefined
       } else {
         switch (msg.text!) {
