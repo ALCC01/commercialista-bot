@@ -1,5 +1,5 @@
-import Bot from './bot'
 import 'dotenv/config'
+import Bot from './bot'
 
 start().catch(err => {
   console.error(err)
