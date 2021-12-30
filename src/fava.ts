@@ -17,6 +17,15 @@ export type Transaction = {
   postings: Posting[]
 }
 
+export async function loadAccounts () {
+  const { data } = await axios({
+    method: 'GET',
+    url: process.env.FAVA_ENDPOINT! + '/income_statement/'
+  })
+
+  return JSON.parse(data.match(/<script .+ id="ledger-data">(.+)<\/script>/)[1]).accounts as string[]
+}
+
 export async function putTransaction (txn: Transaction) {
   const a = await axios({
     method: 'PUT',
