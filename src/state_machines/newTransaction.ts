@@ -1,5 +1,5 @@
 import TelegramBot, { Message } from 'node-telegram-bot-api'
-import { ConditionPredicate, createMachine, interpret } from 'xstate'
+import { ConditionPredicate, createMachine, interpret, assign } from 'xstate'
 import { CANCEL, CONFIRM, DONE } from '../consts'
 import { Posting, putTransaction, Transaction } from '../fava'
 import { CANCEL_KEYBOARD, CANCEL_OR_DONE_KEYBOARD, CONFIRM_KEYBOARD, DEFAULT_KEYBOARD, NO_KEYBOARD, PARSE_MK } from '../markup'
@@ -36,10 +36,7 @@ const machine = createMachine<Context, Event>({
       on: {
         ANSWER: [
           {
-            actions: (ctx, { msg: { text } }) => {
-              ctx.narration = text
-              return ctx
-            },
+            actions: assign({ narration: (ctx, { msg }) => msg.text! }),
             target: 'postings'
           }
         ]
@@ -60,20 +57,15 @@ const machine = createMachine<Context, Event>({
           },
           {
             cond: 'isValidAccount',
-            actions: (ctx, { msg: { text } }) => {
-              ctx.currentAccount = text
-              return ctx
-            },
+            actions: assign({ currentAccount: (ctx, { msg }) => msg.text! }),
             target: '.amount'
           },
           {
             cond: 'isValidAmount',
-            actions: (ctx, { msg }) => {
-              const posting = { account: ctx.currentAccount, amount: parseAmount(msg) } as Posting
-              ctx.postings?.push(posting)
-              ctx.currentAccount = undefined
-              return ctx
-            },
+            actions: assign<Context, Event>({
+              postings: (ctx, { msg }) => [...ctx.postings, { account: ctx.currentAccount, amount: parseAmount(msg) } as Posting],
+              currentAccount: () => undefined
+            }),
             target: '.account'
           },
           {
@@ -94,19 +86,22 @@ const machine = createMachine<Context, Event>({
       }
     },
     confirm: {
-      entry: (ctx) => {
-        ctx.final = {
-          type: 'Transaction',
-          date: formatDate(new Date()),
-          flag: '*',
-          narration: ctx.narration!,
-          postings: ctx.postings,
-          meta: {}
-        }
+      entry: assign<Context, Event>({
+        final: ctx => {
+          const final = {
+            type: 'Transaction',
+            date: formatDate(new Date()),
+            flag: '*',
+            narration: ctx.narration!,
+            postings: ctx.postings,
+            meta: {}
+          } as Transaction
 
-        ctx.client.sendMessage(ctx.id, confirmTransaction(ctx.final), { ...CONFIRM_KEYBOARD, ...PARSE_MK })
-        return ctx
-      },
+          ctx.client.sendMessage(ctx.id, confirmTransaction(final), { ...CONFIRM_KEYBOARD, ...PARSE_MK })
+
+          return final
+        }
+      }),
       on: {
         ANSWER: [
           {
