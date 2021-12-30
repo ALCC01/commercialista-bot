@@ -23,20 +23,21 @@ export default class Bot {
   }
 
   start () {
-    this._client.on('polling_error', err => {
-      console.error(err)
-    })
     this._client.on('text', msg => {
       if (!this.isAllowed(msg.chat.id)) return this._client.sendMessage(msg.chat.id, '⛔ User not allowed', NO_KEYBOARD)
+
       if (msg.text === CANCEL || msg.text === '/cancel') {
         this._machines[msg.chat.id] = undefined
         return this._client.sendMessage(msg.chat.id, '✅ Cancelled', DEFAULT_KEYBOARD)
       }
 
-      if (this._machines[msg.chat.id]) {
-        const state = this._machines[msg.chat.id].send({ type: 'ANSWER', msg })
-        if (state.done) this._machines[msg.chat.id] = undefined
-      } else {
+      try {
+        if (this._machines[msg.chat.id]) {
+          const state = this._machines[msg.chat.id].send({ type: 'ANSWER', msg })
+          if (state.done) this._machines[msg.chat.id] = undefined
+          return
+        }
+
         switch (msg.text!) {
           case NEW_TRANSACTION:
             this._machines[msg.chat.id] = newTransaction(msg, this._client)
@@ -44,6 +45,10 @@ export default class Bot {
           default:
             return this._client.sendMessage(msg.chat.id, '👋 Hi there!', DEFAULT_KEYBOARD)
         }
+      } catch (err) {
+        console.error(err)
+        this._machines[msg.chat.id] = undefined
+        this._client.sendMessage(msg.chat.id, '❗️ Unexpected error', DEFAULT_KEYBOARD)
       }
     })
   }

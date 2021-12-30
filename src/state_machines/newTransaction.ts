@@ -1,9 +1,9 @@
 import TelegramBot, { Message } from 'node-telegram-bot-api'
 import { ConditionPredicate, createMachine, interpret } from 'xstate'
 import { CANCEL, CONFIRM, DONE } from '../consts'
-import { Posting, Transaction } from '../fava'
+import { Posting, putTransaction, Transaction } from '../fava'
 import { CANCEL_KEYBOARD, CANCEL_OR_DONE_KEYBOARD, CONFIRM_KEYBOARD, DEFAULT_KEYBOARD, NO_KEYBOARD, PARSE_MK } from '../markup'
-import { isAmount, parseAmount } from '../utils'
+import { formatDate, isAmount, parseAmount } from '../utils'
 
 type Context = {
   id: number
@@ -97,8 +97,11 @@ const machine = createMachine<Context, Event>({
       entry: (ctx) => {
         ctx.final = {
           type: 'Transaction',
+          date: formatDate(new Date()),
+          flag: '*',
           narration: ctx.narration!,
-          postings: ctx.postings
+          postings: ctx.postings,
+          meta: {}
         }
 
         ctx.client.sendMessage(ctx.id, confirmTransaction(ctx.final), { ...CONFIRM_KEYBOARD, ...PARSE_MK })
@@ -108,8 +111,14 @@ const machine = createMachine<Context, Event>({
         ANSWER: [
           {
             cond: 'isConfirm',
-            actions: ({ client, id, final }) => {
-              client.sendMessage(id, '✅ All done!', DEFAULT_KEYBOARD)
+            actions: async ({ client, id, final }) => {
+              try {
+                await putTransaction(final!)
+                await client.sendMessage(id, '✅ All done!', DEFAULT_KEYBOARD)
+              } catch (err) {
+                console.error(err)
+                await client.sendMessage(id, '❗️ Unexpected error', DEFAULT_KEYBOARD)
+              }
             },
             target: 'done'
           },
