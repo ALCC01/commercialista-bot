@@ -55,25 +55,3 @@ export async function putEntries (e: (Transaction | Balance | Note)[]) {
   const { success, error } = await a.data
   if (!success) throw new Error('Failed PUT /add_entries: ' + error)
 }
-
-export async function putTransaction (txn: Transaction) {
-  const a = await axios({
-    method: 'PUT',
-    url: ENDPOINT + '/add_entries',
-    data: { entries: [txn] }
-  })
-
-  const { success, error } = await a.data
-  if (!success) throw new Error('Failed PUT /add_entries: ' + error)
-}
-
-export async function putBalance (bal: Balance) {
-  const a = await axios({
-    method: 'PUT',
-    url: ENDPOINT + '/add_entries',
-    data: { entries: [bal] }
-  })
-
-  const { success, error } = await a.data
-  if (!success) throw new Error('Failed PUT /add_entries: ' + error)
-}
