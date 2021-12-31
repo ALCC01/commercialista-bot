@@ -28,6 +28,14 @@ export type Balance = {
   }
 }
 
+export type Note = {
+  type: 'Note'
+  date: string
+  meta: {}
+  account: string
+  comment: string
+}
+
 export async function loadAccounts () {
   const { data } = await axios({
     method: 'GET',
@@ -37,22 +45,11 @@ export async function loadAccounts () {
   return JSON.parse(data.match(/<script .+ id="ledger-data">(.+)<\/script>/)[1]).accounts as string[]
 }
 
-export async function putTransaction (txn: Transaction) {
+export async function putEntries (e: (Transaction | Balance | Note)[]) {
   const a = await axios({
     method: 'PUT',
     url: ENDPOINT + '/add_entries',
-    data: { entries: [txn] }
-  })
-
-  const { success, error } = await a.data
-  if (!success) throw new Error('Failed PUT /add_entries: ' + error)
-}
-
-export async function putBalance (bal: Balance) {
-  const a = await axios({
-    method: 'PUT',
-    url: ENDPOINT + '/add_entries',
-    data: { entries: [bal] }
+    data: { entries: e }
   })
 
   const { success, error } = await a.data

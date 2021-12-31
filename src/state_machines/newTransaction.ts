@@ -1,7 +1,7 @@
 import TelegramBot, { Message } from 'node-telegram-bot-api'
 import { ConditionPredicate, createMachine, interpret, assign } from 'xstate'
 import { CANCEL, CONFIRM, DONE } from '../consts'
-import { Posting, putTransaction, Transaction } from '../fava'
+import { Posting, putEntries, Transaction } from '../fava'
 import { accountsKeyboard, CANCEL_KEYBOARD, CONFIRM_KEYBOARD, DEFAULT_KEYBOARD, NO_KEYBOARD, PARSE_MK } from '../markup'
 import { formatDate, isAmount, parseAmount, escape } from '../utils'
 
@@ -108,7 +108,7 @@ const machine = createMachine<Context, Event>({
             cond: 'isConfirm',
             actions: async ({ client, id, final }) => {
               try {
-                await putTransaction(final!)
+                await putEntries([final!])
                 await client.sendMessage(id, '✅ All done!', DEFAULT_KEYBOARD)
               } catch (err) {
                 console.error(err)

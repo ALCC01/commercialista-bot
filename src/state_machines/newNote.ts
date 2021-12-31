@@ -1,23 +1,21 @@
 import TelegramBot, { Message } from 'node-telegram-bot-api'
 import { ConditionPredicate, createMachine, interpret, assign } from 'xstate'
 import { CANCEL, CONFIRM } from '../consts'
-import { Balance, putEntries } from '../fava'
+import { Note, putEntries } from '../fava'
 import { accountsKeyboard, CANCEL_KEYBOARD, CONFIRM_KEYBOARD, DEFAULT_KEYBOARD, PARSE_MK } from '../markup'
-import { formatDate, isAmount, parseAmount, escape } from '../utils'
+import { formatDate, escape } from '../utils'
 
 type Context = {
   id: number
   client: TelegramBot
   account?: string
-  amount?: string
-  final?: Balance
+  comment?: string
+  final?: Note
 }
 
 type Event = { type: 'ANSWER', msg: Message }
 
 const guards: Record<string, ConditionPredicate<Context, Event>> = {
-  isValidAmount: (ctx, { msg }, meta) => isAmount(msg),
-  isInvalidAmount: (ctx, { msg }, meta) => !isAmount(msg),
   isConfirm: (ctx, { msg: { text } }) => text === CONFIRM,
   isNotConfirm: (ctx, { msg: { text } }) => text !== CONFIRM
 }
@@ -32,26 +30,18 @@ const machine = createMachine<Context, Event>({
         ANSWER: [
           {
             actions: assign({ account: (ctx, { msg }) => msg.text! }),
-            target: 'amount'
+            target: 'comment'
           }
         ]
       }
     },
-    amount: {
-      entry: ({ client, id }) => client.sendMessage(id, '💶 Amount', CANCEL_KEYBOARD),
+    comment: {
+      entry: ({ client, id }) => client.sendMessage(id, '🗒 Note', CANCEL_KEYBOARD),
       on: {
         ANSWER: [
           {
-            cond: 'isValidAmount',
-            actions: assign<Context, Event>({
-              amount: (ctx, { msg }) => parseAmount(msg)
-            }),
+            actions: assign({ comment: (ctx, { msg: { text } }) => text }),
             target: 'confirm'
-          },
-          {
-            cond: 'isInvalidAmount',
-            actions: ({ client, id }) => client.sendMessage(id, '❗️ Expected a valid amount', CANCEL_KEYBOARD),
-            target: 'amount'
           }
         ]
       }
@@ -59,16 +49,15 @@ const machine = createMachine<Context, Event>({
     confirm: {
       entry: assign<Context, Event>({
         final: ctx => {
-          const [number, currency] = ctx.amount!.split(' ')
           const final = {
-            type: 'Balance',
+            type: 'Note',
             date: formatDate(new Date()),
             account: ctx.account!,
-            amount: { number, currency },
+            comment: ctx.comment!,
             meta: {}
-          } as Balance
+          } as Note
 
-          ctx.client.sendMessage(ctx.id, confirmBalance(final), { ...CONFIRM_KEYBOARD, ...PARSE_MK })
+          ctx.client.sendMessage(ctx.id, confirmNote(final), { ...CONFIRM_KEYBOARD, ...PARSE_MK })
 
           return final
         }
@@ -111,11 +100,11 @@ export default (msg: Message, client: TelegramBot) => {
   }
 
   const service = interpret<Context, any, Event>(machine.withContext(context))
-
   service.start()
+
   return service
 }
 
-const confirmBalance = ({ account, amount: { number, currency } }: Balance) => {
-  return `📊 *${escape(account!)}*\n\nBalance: \`${escape(`${number} ${currency}`)}\`\n\n*Confirm?*`
+const confirmNote = ({ account, comment }: Note) => {
+  return `🗒 *${escape(account)}*\n\n${escape(comment)}\n\n*Confirm?*`
 }
