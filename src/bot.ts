@@ -1,7 +1,8 @@
 import TelegramBot from 'node-telegram-bot-api'
-import { CANCEL, NEW_TRANSACTION } from './consts'
+import { CANCEL, NEW_BALANCE, NEW_TRANSACTION } from './consts'
 import { DEFAULT_KEYBOARD, NO_KEYBOARD } from './markup'
 import newTransaction from './state_machines/newTransaction'
+import newBalance from './state_machines/newBalance'
 
 type BotOptions = {
   allowedIds: number[]
@@ -41,6 +42,9 @@ export default class Bot {
         switch (msg.text!) {
           case NEW_TRANSACTION:
             this._machines[msg.chat.id] = newTransaction(msg, this._client)
+            break
+          case NEW_BALANCE:
+            this._machines[msg.chat.id] = newBalance(msg, this._client)
             break
           default:
             return this._client.sendMessage(msg.chat.id, '👋 Hi there!', DEFAULT_KEYBOARD)

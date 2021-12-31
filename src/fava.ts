@@ -17,6 +17,17 @@ export type Transaction = {
   postings: Posting[]
 }
 
+export type Balance = {
+  type: 'Balance'
+  date: string
+  meta: {}
+  account: string
+  amount: {
+    number: string
+    currency: string
+  }
+}
+
 export async function loadAccounts () {
   const { data } = await axios({
     method: 'GET',
@@ -31,6 +42,17 @@ export async function putTransaction (txn: Transaction) {
     method: 'PUT',
     url: ENDPOINT + '/add_entries',
     data: { entries: [txn] }
+  })
+
+  const { success, error } = await a.data
+  if (!success) throw new Error('Failed PUT /add_entries: ' + error)
+}
+
+export async function putBalance (bal: Balance) {
+  const a = await axios({
+    method: 'PUT',
+    url: ENDPOINT + '/add_entries',
+    data: { entries: [bal] }
   })
 
   const { success, error } = await a.data

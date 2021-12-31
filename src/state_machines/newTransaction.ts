@@ -1,9 +1,8 @@
 import TelegramBot, { Message } from 'node-telegram-bot-api'
 import { ConditionPredicate, createMachine, interpret, assign } from 'xstate'
-import { ACCOUNTS } from '../app'
 import { CANCEL, CONFIRM, DONE } from '../consts'
 import { Posting, putTransaction, Transaction } from '../fava'
-import { CANCEL_KEYBOARD, CONFIRM_KEYBOARD, DEFAULT_KEYBOARD, NO_KEYBOARD, PARSE_MK } from '../markup'
+import { accountsKeyboard, CANCEL_KEYBOARD, CONFIRM_KEYBOARD, DEFAULT_KEYBOARD, NO_KEYBOARD, PARSE_MK } from '../markup'
 import { formatDate, isAmount, parseAmount, escape } from '../utils'
 
 type Context = {
@@ -146,16 +145,6 @@ export default (msg: Message, client: TelegramBot) => {
   service.start()
   return service
 }
-
-const accountsKeyboard = (done: boolean) => ({
-  reply_markup: {
-    resize_keyboard: true,
-    keyboard: [
-      done ? [{ text: DONE }, { text: CANCEL }] : [{ text: CANCEL }],
-      ...(ACCOUNTS.map(e => [{ text: e }]))
-    ]
-  }
-})
 
 function confirmTransaction ({ payee, narration, postings }: Transaction) {
   let r = `🧾 ${payee ? `*${escape(payee!)}* ${escape(narration)}` : `*${escape(narration)}*`}\n\n`
