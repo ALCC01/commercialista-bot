@@ -20,8 +20,9 @@ export const parseAmount = (message: Message): string => {
 }
 
 export const isAmount = ({ text }: Message) => !isNaN(parseFloat(text!.replace(',', '.').replace(/[^\d.-]/g, '')))
+
 const pad = (n: number, length = 2, fill = '0') => String(n).padStart(length, fill)
-export const formatDate = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth())}-${pad(d.getDay())}`
+export const formatDate = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 
 // https://core.telegram.org/bots/api#markdownv2-style
 const ILLEGAL_CHARS = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!']
