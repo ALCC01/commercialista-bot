@@ -1,9 +1,11 @@
 import TelegramBot, { Message } from 'node-telegram-bot-api'
-import { ConditionPredicate, createMachine, interpret, assign } from 'xstate'
-import { CANCEL, CONFIRM } from '../consts'
+import { createMachine, interpret, assign } from 'xstate'
 import { Balance, putEntries } from '../fava'
-import { accountsKeyboard, CANCEL_KEYBOARD, CONFIRM_KEYBOARD, DEFAULT_KEYBOARD, PARSE_MK } from '../markup'
-import { formatDate, isAmount, parseAmount, escape } from '../utils'
+import { DEFAULT_KEYBOARD } from '../markup'
+import { formatDate, escape } from '../utils'
+import askAccount from './askAccount'
+import askAmount from './askAmount'
+import askConfirm from './askConfirm'
 
 type Context = {
   id: number
@@ -15,45 +17,32 @@ type Context = {
 
 type Event = { type: 'ANSWER', msg: Message }
 
-const guards: Record<string, ConditionPredicate<Context, Event>> = {
-  isValidAmount: (ctx, { msg }, meta) => isAmount(msg),
-  isInvalidAmount: (ctx, { msg }, meta) => !isAmount(msg),
-  isConfirm: (ctx, { msg: { text } }) => text === CONFIRM,
-  isNotConfirm: (ctx, { msg: { text } }) => text !== CONFIRM
-}
-
 const machine = createMachine<Context, Event>({
-  id: 'newTransaction',
+  id: 'newBalance',
   initial: 'account',
   states: {
     account: {
-      entry: ({ client, id }) => client.sendMessage(id, '💳 Account', accountsKeyboard(false)),
-      on: {
-        ANSWER: [
-          {
-            actions: assign({ account: (ctx, { msg }) => msg.text! }),
-            target: 'amount'
-          }
-        ]
+      invoke: {
+        id: 'askAccount',
+        src: askAccount,
+        autoForward: true,
+        data: (ctx) => ({ id: ctx.id, client: ctx.client, doneAllowed: false }),
+        onDone: {
+          actions: assign({ account: (ctx, { data }) => data }),
+          target: 'amount'
+        }
       }
     },
     amount: {
-      entry: ({ client, id }) => client.sendMessage(id, '💶 Amount', CANCEL_KEYBOARD),
-      on: {
-        ANSWER: [
-          {
-            cond: 'isValidAmount',
-            actions: assign<Context, Event>({
-              amount: (ctx, { msg }) => parseAmount(msg)
-            }),
-            target: 'confirm'
-          },
-          {
-            cond: 'isInvalidAmount',
-            actions: ({ client, id }) => client.sendMessage(id, '❗️ Expected a valid amount', CANCEL_KEYBOARD),
-            target: 'amount'
-          }
-        ]
+      invoke: {
+        id: 'askAmount',
+        src: askAmount,
+        autoForward: true,
+        data: (ctx) => ({ id: ctx.id, client: ctx.client }),
+        onDone: {
+          actions: assign({ amount: (ctx, { data }) => data }),
+          target: 'confirm'
+        }
       }
     },
     confirm: {
@@ -68,40 +57,32 @@ const machine = createMachine<Context, Event>({
             meta: {}
           } as Balance
 
-          ctx.client.sendMessage(ctx.id, confirmBalance(final), { ...CONFIRM_KEYBOARD, ...PARSE_MK })
-
           return final
         }
       }),
-      on: {
-        ANSWER: [
-          {
-            cond: 'isConfirm',
-            actions: async ({ client, id, final }) => {
-              try {
-                await putEntries([final!])
-                await client.sendMessage(id, '✅ All done!', DEFAULT_KEYBOARD)
-              } catch (err) {
-                console.error(err)
-                await client.sendMessage(id, '❗️ Unexpected error', DEFAULT_KEYBOARD)
-              }
-            },
-            target: 'done'
+      invoke: {
+        id: 'askConfirm',
+        src: askConfirm,
+        autoForward: true,
+        data: (ctx) => ({ id: ctx.id, client: ctx.client, question: confirmBalance(ctx.final!) }),
+        onDone: {
+          actions: async ({ client, id, final }) => {
+            try {
+              await putEntries([final!])
+              await client.sendMessage(id, '✅ All done!', DEFAULT_KEYBOARD)
+            } catch (err) {
+              console.error(err)
+              await client.sendMessage(id, '❗️ Unexpected error', DEFAULT_KEYBOARD)
+            }
           },
-          {
-            cond: 'isNotConfirm',
-            actions: ({ client, id }) => client.sendMessage(id, `❗️ Expected ${CONFIRM} or ${CANCEL}`, CONFIRM_KEYBOARD),
-            target: 'confirm'
-          }
-        ]
+          target: 'done'
+        }
       }
     },
     done: {
       type: 'final'
     }
   }
-}).withConfig({
-  guards
 })
 
 export default (msg: Message, client: TelegramBot) => {

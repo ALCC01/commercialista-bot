@@ -26,12 +26,10 @@ const machine = createMachine<Context, Event>({
     narration: {
       entry: ({ client, id }) => client.sendMessage(id, '🧾 Narration', NO_KEYBOARD),
       on: {
-        ANSWER: [
-          {
-            actions: assign({ narration: (ctx, { msg }) => msg.text! }),
-            target: 'account'
-          }
-        ]
+        ANSWER: {
+          actions: assign({ narration: (ctx, { msg }) => msg.text! }),
+          target: 'account'
+        }
       }
     },
     account: {
@@ -58,15 +56,13 @@ const machine = createMachine<Context, Event>({
         src: askAmount,
         autoForward: true,
         data: (ctx) => ({ id: ctx.id, client: ctx.client }),
-        onDone: [
-          {
-            actions: assign<Context, DoneInvokeEvent<any>>({
-              postings: (ctx, { data }) => [...ctx.postings, { account: ctx.currentAccount, amount: data } as Posting],
-              currentAccount: () => undefined
-            }),
-            target: 'account'
-          }
-        ]
+        onDone: {
+          actions: assign<Context, DoneInvokeEvent<any>>({
+            postings: (ctx, { data }) => [...ctx.postings, { account: ctx.currentAccount, amount: data } as Posting],
+            currentAccount: () => undefined
+          }),
+          target: 'account'
+        }
       }
     },
     confirm: {
@@ -85,20 +81,18 @@ const machine = createMachine<Context, Event>({
         src: askConfirm,
         autoForward: true,
         data: (ctx) => ({ id: ctx.id, client: ctx.client, question: confirmTransaction(ctx.final!) }),
-        onDone: [
-          {
-            actions: async ({ client, id, final }) => {
-              try {
-                await putEntries([final!])
-                await client.sendMessage(id, '✅ All done!', DEFAULT_KEYBOARD)
-              } catch (err) {
-                console.error(err)
-                await client.sendMessage(id, '❗️ Unexpected error', DEFAULT_KEYBOARD)
-              }
-            },
-            target: 'done'
-          }
-        ]
+        onDone: {
+          actions: async ({ client, id, final }) => {
+            try {
+              await putEntries([final!])
+              await client.sendMessage(id, '✅ All done!', DEFAULT_KEYBOARD)
+            } catch (err) {
+              console.error(err)
+              await client.sendMessage(id, '❗️ Unexpected error', DEFAULT_KEYBOARD)
+            }
+          },
+          target: 'done'
+        }
       }
     },
     done: {
