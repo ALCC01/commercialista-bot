@@ -1,9 +1,10 @@
 import TelegramBot from 'node-telegram-bot-api'
-import { CANCEL, NEW_BALANCE, NEW_NOTE, NEW_TRANSACTION } from './consts'
+import { CANCEL, GET_ERRORS, NEW_BALANCE, NEW_NOTE, NEW_TRANSACTION } from './consts'
 import { DEFAULT_KEYBOARD, NO_KEYBOARD } from './markup'
 import newTransaction from './state_machines/newTransaction'
 import newBalance from './state_machines/newBalance'
 import newNote from './state_machines/newNote'
+import getErrors from './state_machines/getErrors'
 
 type BotOptions = {
   allowedIds: number[]
@@ -49,6 +50,9 @@ export default class Bot {
             break
           case NEW_NOTE:
             this._machines[msg.chat.id] = newNote(msg, this._client)
+            break
+          case GET_ERRORS:
+            this._machines[msg.chat.id] = getErrors(msg, this._client)
             break
           default:
             return this._client.sendMessage(msg.chat.id, '👋 Hi there!', DEFAULT_KEYBOARD)
