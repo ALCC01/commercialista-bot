@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.1.0
 ### Added
 
 * Fetch options and account list from Fava on startup (currently used to suggest

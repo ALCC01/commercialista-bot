@@ -1,6 +1,6 @@
 {
   "name": "commercialista-bot",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "A little bean-counting minion",
   "main": "src/app.ts",
   "scripts": {
