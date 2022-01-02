@@ -1,9 +1,11 @@
 import TelegramBot, { Message } from 'node-telegram-bot-api'
-import { ConditionPredicate, createMachine, interpret, assign } from 'xstate'
-import { CANCEL, CONFIRM, DONE } from '../consts'
+import { createMachine, interpret, assign, DoneInvokeEvent } from 'xstate'
 import { Posting, putEntries, Transaction } from '../fava'
-import { accountsKeyboard, CANCEL_KEYBOARD, CONFIRM_KEYBOARD, DEFAULT_KEYBOARD, NO_KEYBOARD, PARSE_MK } from '../markup'
-import { formatDate, isAmount, parseAmount, escape } from '../utils'
+import { DEFAULT_KEYBOARD, NO_KEYBOARD } from '../markup'
+import { formatDate, escape } from '../utils'
+import askAccount from './askAccount'
+import askAmount from './askAmount'
+import askConfirm from './askConfirm'
 
 type Context = {
   id: number
@@ -17,16 +19,6 @@ type Context = {
 
 type Event = { type: 'ANSWER', msg: Message }
 
-const guards: Record<string, ConditionPredicate<Context, Event>> = {
-  isDoneAllowed: (ctx, { msg: { text } }, meta) => meta.state.matches('postings.account') && text === DONE && ctx.postings.length > 1,
-  isDoneNotAllowed: (ctx, { msg: { text } }, meta) => meta.state.matches('postings.account') && text === DONE && ctx.postings.length < 2,
-  isValidAccount: (ctx, e, meta) => meta.state.matches('postings.account'),
-  isValidAmount: (ctx, { msg }, meta) => meta.state.matches('postings.amount') && isAmount(msg),
-  isInvalidAmount: (ctx, { msg }, meta) => meta.state.matches('postings.amount') && !isAmount(msg),
-  isConfirm: (ctx, { msg: { text } }) => text === CONFIRM,
-  isNotConfirm: (ctx, { msg: { text } }) => text !== CONFIRM
-}
-
 const machine = createMachine<Context, Event>({
   id: 'newTransaction',
   initial: 'narration',
@@ -37,75 +29,64 @@ const machine = createMachine<Context, Event>({
         ANSWER: [
           {
             actions: assign({ narration: (ctx, { msg }) => msg.text! }),
-            target: 'postings'
+            target: 'account'
           }
         ]
       }
     },
-    postings: {
-      initial: 'account',
-      on: {
-        ANSWER: [
+    account: {
+      invoke: {
+        id: 'askAccount',
+        src: askAccount,
+        autoForward: true,
+        data: (ctx) => ({ id: ctx.id, client: ctx.client, doneAllowed: ctx.postings.length >= 2 }),
+        onDone: [
           {
-            cond: 'isDoneAllowed',
+            cond: (ctx, { data }) => data === undefined,
             target: 'confirm'
           },
           {
-            cond: 'isDoneNotAllowed',
-            actions: ({ client, id }) => client.sendMessage(id, '❗️ You must provide at least 2 accounts per transaction', CANCEL_KEYBOARD),
-            target: '.account'
-          },
-          {
-            cond: 'isValidAccount',
-            actions: assign({ currentAccount: (ctx, { msg }) => msg.text! }),
-            target: '.amount'
-          },
-          {
-            cond: 'isValidAmount',
-            actions: assign<Context, Event>({
-              postings: (ctx, { msg }) => [...ctx.postings, { account: ctx.currentAccount, amount: parseAmount(msg) } as Posting],
-              currentAccount: () => undefined
-            }),
-            target: '.account'
-          },
-          {
-            cond: 'isInvalidAmount',
-            actions: ({ client, id }) => client.sendMessage(id, '❗️ Expected a valid amount', CANCEL_KEYBOARD),
-            target: '.amount'
+            actions: assign({ currentAccount: (ctx, { data }) => data }),
+            target: 'amount'
           }
         ]
-      },
-      states: {
-        account: {
-          entry: ({ client, id, postings }) => client.sendMessage(id,
-            postings.length > 1 ? `💳 Account (or ${DONE})` : '💳 Account',
-            accountsKeyboard(postings.length > 1)
-          )
-        },
-        amount: { entry: ({ client, id }) => client.sendMessage(id, '💶 Amount', CANCEL_KEYBOARD) }
+      }
+    },
+    amount: {
+      invoke: {
+        id: 'askAmount',
+        src: askAmount,
+        autoForward: true,
+        data: (ctx) => ({ id: ctx.id, client: ctx.client }),
+        onDone: [
+          {
+            actions: assign<Context, DoneInvokeEvent<any>>({
+              postings: (ctx, { data }) => [...ctx.postings, { account: ctx.currentAccount, amount: data } as Posting],
+              currentAccount: () => undefined
+            }),
+            target: 'account'
+          }
+        ]
       }
     },
     confirm: {
       entry: assign<Context, Event>({
-        final: ctx => {
-          const final = {
-            type: 'Transaction',
-            date: formatDate(new Date()),
-            flag: '*',
-            narration: ctx.narration!,
-            postings: ctx.postings,
-            meta: {}
-          } as Transaction
-
-          ctx.client.sendMessage(ctx.id, confirmTransaction(final), { ...CONFIRM_KEYBOARD, ...PARSE_MK })
-
-          return final
-        }
+        final: ctx => ({
+          type: 'Transaction',
+          date: formatDate(new Date()),
+          flag: '*',
+          narration: ctx.narration!,
+          postings: ctx.postings,
+          meta: {}
+        } as Transaction)
       }),
-      on: {
-        ANSWER: [
+      invoke: {
+        id: 'askConfirm',
+        src: askConfirm,
+        autoForward: true,
+        data: (ctx) => ({ id: ctx.id, client: ctx.client, question: confirmTransaction(ctx.final!) }),
+        onDone: [
           {
-            cond: 'isConfirm',
             actions: async ({ client, id, final }) => {
               try {
                 await putEntries([final!])
@@ -116,11 +97,6 @@ const machine = createMachine<Context, Event>({
               }
             },
             target: 'done'
-          },
-          {
-            cond: 'isNotConfirm',
-            actions: ({ client, id }) => client.sendMessage(id, `❗️ Expected ${CONFIRM} or ${CANCEL}`, CONFIRM_KEYBOARD),
-            target: 'confirm'
           }
         ]
       }
@@ -129,8 +105,6 @@ const machine = createMachine<Context, Event>({
       type: 'final'
     }
   }
-}).withConfig({
-  guards
 })
 
 export default (msg: Message, client: TelegramBot) => {
