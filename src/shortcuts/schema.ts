@@ -6,7 +6,7 @@ type ShortcutPosting = {
   amount: string | { type: 'var', var: string } | { type: 'evaluate', expr: string }
 }
 
-type ShortcutQuestion =
+export type ShortcutQuestion =
   { var: string, type: 'account', question: string } |
   { var: string, type: 'amount', question: string }
 
