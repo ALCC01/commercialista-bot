@@ -19,7 +19,9 @@ type Event = { type: 'ANSWER', msg: Message }
 
 export type StateNode = StateNodeConfig<Context, any, Event>
 
-export const buildShortcut = (shortcut: Shortcut): StateMachine<Context, any, Event> => {
+export type CompiledShortcut = StateMachine<Context, any, Event>
+
+export const buildShortcut = (shortcut: Shortcut): CompiledShortcut => {
   const prototype: MachineConfig<Context, any, Event> = {
     id: shortcut.name,
     initial: 'narration',

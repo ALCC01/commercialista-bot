@@ -1,13 +1,13 @@
 import TelegramBot, { Message } from 'node-telegram-bot-api'
 import { createMachine, interpret, assign } from 'xstate'
 import { DEFAULT_KEYBOARD } from '../markup'
-import { buildShortcut } from '../shortcuts/compiler'
 import { Shortcut } from '../shortcuts/schema'
 import askShortcut from './askShortcut'
 import { putEntries, Transaction } from '../fava'
 import askConfirm from './askConfirm'
 import { confirmTransaction } from './newTransaction'
 import { formatDate } from '../utils'
+import { getShortcutMachine } from '../shortcuts'
 
 type Context = {
   id: number
@@ -38,7 +38,7 @@ const machine = createMachine<Context, Event>({
     run: {
       invoke: {
         id: 'runShortcut',
-        src: (ctx) => buildShortcut(ctx.shortcut!),
+        src: (ctx) => getShortcutMachine(ctx.shortcut!.icon),
         autoForward: true,
         data: (ctx) => ({ id: ctx.id, client: ctx.client, shortcut: ctx.shortcut }),
         onDone: {
