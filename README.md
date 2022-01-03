@@ -32,6 +32,7 @@ for the beancount CLI tools.
   to use the bot (get yours from [@RawDataBot][raw])
 * `DEFAULT_CURRENCY`: the default [currency/commodity][commodities] to use when
   none is provided
+* `SHORTCUTS_FILE`: your shortcuts file location. Defaults to `./shortcuts.json`
 
 ## [License](./LICENSE)
 

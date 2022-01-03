@@ -1,11 +1,12 @@
 import TelegramBot, { Message } from 'node-telegram-bot-api'
 import { createMachine, interpret, assign, DoneInvokeEvent } from 'xstate'
 import { Posting, putEntries, Transaction } from '../fava'
-import { DEFAULT_KEYBOARD, NO_KEYBOARD } from '../markup'
+import { DEFAULT_KEYBOARD } from '../markup'
 import { formatDate, escape } from '../utils'
 import askAccount from './askAccount'
 import askAmount from './askAmount'
 import askConfirm from './askConfirm'
+import askNarration from './askNarration'
 
 type Context = {
   id: number
@@ -24,10 +25,16 @@ const machine = createMachine<Context, Event>({
   initial: 'narration',
   states: {
     narration: {
-      entry: ({ client, id }) => client.sendMessage(id, '🧾 Narration', NO_KEYBOARD),
-      on: {
-        ANSWER: {
-          actions: assign({ narration: (ctx, { msg }) => msg.text! }),
+      invoke: {
+        id: 'askNarration',
+        src: askNarration,
+        autoForward: true,
+        data: (ctx) => ({ id: ctx.id, client: ctx.client, askPayee: true, askNarration: true }),
+        onDone: {
+          actions: assign({
+            narration: (ctx, { data }) => data.narration,
+            payee: (ctx, { data }) => data.payee
+          }),
           target: 'account'
         }
       }
@@ -72,6 +79,7 @@ const machine = createMachine<Context, Event>({
           date: formatDate(new Date()),
           flag: '*',
           narration: ctx.narration!,
+          payee: ctx.payee,
           postings: ctx.postings,
           meta: {}
         } as Transaction)
@@ -114,7 +122,7 @@ export default (msg: Message, client: TelegramBot) => {
   return service
 }
 
-function confirmTransaction ({ payee, narration, postings }: Transaction) {
+export function confirmTransaction ({ payee, narration, postings }: Transaction) {
   let r = `🧾 ${payee ? `*${escape(payee!)}* ${escape(narration)}` : `*${escape(narration)}*`}\n\n`
   r += postings
     .map(({ account, amount }) => `_${escape(account)}_\`\t${escape(amount)}\``)

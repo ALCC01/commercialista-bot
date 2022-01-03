@@ -1,0 +1,130 @@
+{
+  "$ref": "#/definitions/ShortcutsFile",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "Shortcut": {
+      "additionalProperties": false,
+      "properties": {
+        "icon": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "narration": {
+          "$ref": "#/definitions/ShortcutNarration"
+        },
+        "payee": {
+          "$ref": "#/definitions/ShortcutPayee"
+        },
+        "postings": {
+          "items": {
+            "$ref": "#/definitions/ShortcutPosting"
+          },
+          "type": "array"
+        },
+        "script": {
+          "items": {
+            "$ref": "#/definitions/ShortcutQuestion"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "icon",
+        "payee",
+        "narration",
+        "script",
+        "postings"
+      ],
+      "type": "object"
+    },
+    "ShortcutNarration": {
+      "type": "string"
+    },
+    "ShortcutPayee": {
+      "type": "string"
+    },
+    "ShortcutPosting": {
+      "additionalProperties": false,
+      "properties": {
+        "account": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "account",
+        "amount"
+      ],
+      "type": "object"
+    },
+    "ShortcutQuestion": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "question": {
+              "type": "string"
+            },
+            "type": {
+              "const": "account",
+              "type": "string"
+            },
+            "var": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "var",
+            "type",
+            "question"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "question": {
+              "type": "string"
+            },
+            "type": {
+              "const": "amount",
+              "type": "string"
+            },
+            "var": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "var",
+            "type",
+            "question"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "ShortcutsFile": {
+      "additionalProperties": false,
+      "properties": {
+        "$schema": {
+          "type": "string"
+        },
+        "shortcuts": {
+          "items": {
+            "$ref": "#/definitions/Shortcut"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "shortcuts"
+      ],
+      "type": "object"
+    }
+  }
+}
