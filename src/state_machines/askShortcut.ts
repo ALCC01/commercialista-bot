@@ -2,6 +2,7 @@ import TelegramBot, { Message } from 'node-telegram-bot-api'
 import { createMachine, assign, ConditionPredicate } from 'xstate'
 import { CANCEL } from '../consts'
 import { findShortcut, Shortcut, SHORTCUTS } from '../shortcuts'
+import { chunks } from '../utils'
 
 type Context = {
   id: number
@@ -49,7 +50,7 @@ const shortcutsKeyboard = () => ({
     resize_keyboard: true,
     keyboard: [
       [{ text: CANCEL }],
-      [...SHORTCUTS.map(({ icon }) => ({ text: icon }))]
+      ...chunks(SHORTCUTS.map(({ icon }) => ({ text: icon })), 3)
     ]
   }
 })
