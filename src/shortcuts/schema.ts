@@ -9,10 +9,12 @@ export type ShortcutQuestion =
 
 export type ShortcutNarration = string | 'ask'
 
+export type ShortcutPayee = string | 'ask' | 'ignore'
+
 export type Shortcut = {
   name: string
   icon: string
-  // payee: string | 'ask' | 'ignore'
+  payee: ShortcutPayee
   narration: ShortcutNarration
   script: ShortcutQuestion[]
   postings: ShortcutPosting[]

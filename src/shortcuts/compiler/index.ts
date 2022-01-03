@@ -11,6 +11,7 @@ export type Context = {
   client: TelegramBot
   shortcut?: Shortcut
   narration?: string
+  payee?: string
   variables?: { [key: string]: string }
   postings?: Posting[]
 }
@@ -33,7 +34,7 @@ export const buildShortcut = (shortcut: Shortcut): CompiledShortcut => {
     }
   }
 
-  prototype.states!.narration = buildNarration(shortcut.narration)
+  prototype.states!.narration = buildNarration(shortcut.narration, shortcut.payee)
   prototype.states!.questions = buildQuestions(shortcut.script)
   prototype.states!.postings = buildPostings(shortcut.postings)
 

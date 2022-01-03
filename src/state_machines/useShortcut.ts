@@ -54,6 +54,7 @@ const machine = createMachine<Context, Event>({
           date: formatDate(new Date()),
           flag: '*',
           narration: data.narration!,
+          payee: data.payee,
           postings: data.postings,
           meta: {}
         } as Transaction)
