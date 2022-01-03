@@ -27,3 +27,9 @@ export const formatDate = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 
 // https://core.telegram.org/bots/api#markdownv2-style
 const ILLEGAL_CHARS = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!']
 export const escape = (text: string) => ILLEGAL_CHARS.reduce((txt, char) => txt.replaceAll(char, `\\${char}`), text)
+
+export const chunks = (a: Array<any>, size: number) =>
+  Array(Math.ceil(a.length / size))
+    .fill(0)
+    .map((_, i) => i * size)
+    .map(begin => a.slice(begin, begin + size))
