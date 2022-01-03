@@ -1,7 +1,7 @@
 import 'dotenv/config'
 import Bot from './bot'
 import { loadAccounts } from './fava'
-import { loadShortcuts } from './shortcuts/schema'
+import { loadShortcuts } from './shortcuts'
 
 export let ACCOUNTS: string[] = []
 

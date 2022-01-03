@@ -19,5 +19,6 @@ export type Shortcut = {
 }
 
 export type ShortcutsFile = {
+  $schema?: string
   shortcuts: Shortcut[]
 }

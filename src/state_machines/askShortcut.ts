@@ -1,7 +1,7 @@
 import TelegramBot, { Message } from 'node-telegram-bot-api'
 import { createMachine, assign, ConditionPredicate } from 'xstate'
 import { CANCEL } from '../consts'
-import { findShortcut, Shortcut, SHORTCUTS } from '../shortcuts/schema'
+import { findShortcut, Shortcut, SHORTCUTS } from '../shortcuts'
 
 type Context = {
   id: number

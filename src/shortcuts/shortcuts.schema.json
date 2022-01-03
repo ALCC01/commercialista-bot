@@ -104,6 +104,9 @@
     "ShortcutsFile": {
       "additionalProperties": false,
       "properties": {
+        "$schema": {
+          "type": "string"
+        },
         "shortcuts": {
           "items": {
             "$ref": "#/definitions/Shortcut"
