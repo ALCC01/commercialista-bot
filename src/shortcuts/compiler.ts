@@ -1,9 +1,10 @@
 import TelegramBot, { Message } from 'node-telegram-bot-api'
 import { assign, createMachine, DoneInvokeEvent, MachineConfig, StateMachine, StateNodeConfig } from 'xstate'
+import { Posting } from '../fava'
 import { NO_KEYBOARD } from '../markup'
 import askAccount from '../state_machines/askAccount'
 import askAmount from '../state_machines/askAmount'
-import { Shortcut, ShortcutNarration, ShortcutQuestion } from './schema'
+import { Shortcut, ShortcutNarration, ShortcutPosting, ShortcutQuestion } from './schema'
 
 type Context = {
   id: number
@@ -11,6 +12,7 @@ type Context = {
   shortcut?: Shortcut
   narration?: string
   variables?: { [key: string]: string }
+  postings?: Posting[]
 }
 
 type Event = { type: 'ANSWER', msg: Message }
@@ -62,7 +64,7 @@ export const buildQuestions = (script: ShortcutQuestion[]): StateNode => {
   const node: StateNode = {
     initial: script[0].var,
     states: {},
-    onDone: { target: 'done' }
+    onDone: { target: 'postings' }
   }
 
   node.states = Object.fromEntries(script.map((q, i, a) => {
@@ -72,6 +74,30 @@ export const buildQuestions = (script: ShortcutQuestion[]): StateNode => {
   node.states.done = { type: 'final' }
 
   return node
+}
+
+const replaceVariables = (str: string, variables: { [key: string]: string }) => {
+  for (const [k, v] of Object.entries(variables)) {
+    str = str.replaceAll(k, v)
+  }
+
+  return str
+}
+
+const evaluatePosting = ({ account, amount }: ShortcutPosting, variables: { [key: string]: string }): Posting => {
+  return {
+    account: replaceVariables(account, variables),
+    amount: replaceVariables(amount, variables)
+  }
+}
+
+const buildPostings = (postings: ShortcutPosting[]): StateNode => {
+  return {
+    always: {
+      actions: assign({ postings: ctx => ctx.shortcut!.postings.map(p => evaluatePosting(p, ctx.variables!)) }),
+      target: 'done'
+    }
+  }
 }
 
 export const buildNarration = (narration: ShortcutNarration): StateNode => {
@@ -110,6 +136,7 @@ export const buildShortcut = (shortcut: Shortcut): StateMachine<Context, any, Ev
 
   prototype.states!.narration = buildNarration(shortcut.narration)
   prototype.states!.questions = buildQuestions(shortcut.script)
+  prototype.states!.postings = buildPostings(shortcut.postings)
 
   return createMachine(prototype)
 }

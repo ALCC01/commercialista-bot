@@ -1,9 +1,9 @@
 import { readFile } from 'fs/promises'
 import { resolve } from 'path'
 
-type ShortcutPosting = {
-  account: string | { type: 'var', var: string } | { type: 'evaluate', expr: string },
-  amount: string | { type: 'var', var: string } | { type: 'evaluate', expr: string }
+export type ShortcutPosting = {
+  account: string
+  amount: string
 }
 
 export type ShortcutQuestion =
@@ -19,7 +19,6 @@ export type Shortcut = {
   narration: ShortcutNarration
   script: ShortcutQuestion[]
   postings: ShortcutPosting[]
-  allowMorePostings: boolean
 }
 
 export type ShortcutsFile = {
