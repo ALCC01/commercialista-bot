@@ -4,7 +4,7 @@ export type ShortcutPosting = {
 }
 
 export type ShortcutQuestion =
-  { var: string, type: 'account', question: string } |
+  { var: string, type: 'account', question: string, filter?: string } |
   { var: string, type: 'amount', question: string }
 
 export type ShortcutNarration = string | 'ask'

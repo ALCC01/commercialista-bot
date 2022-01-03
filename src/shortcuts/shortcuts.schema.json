@@ -67,6 +67,9 @@
         {
           "additionalProperties": false,
           "properties": {
+            "filter": {
+              "type": "string"
+            },
             "question": {
               "type": "string"
             },
