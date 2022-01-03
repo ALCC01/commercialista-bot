@@ -4,13 +4,17 @@ import { DEFAULT_KEYBOARD } from '../markup'
 import { buildShortcut } from '../shortcuts/compiler'
 import { Shortcut } from '../shortcuts/schema'
 import askShortcut from './askShortcut'
-import { inspect } from 'util'
+import { putEntries, Transaction } from '../fava'
+import askConfirm from './askConfirm'
+import { confirmTransaction } from './newTransaction'
+import { formatDate } from '../utils'
 
 type Context = {
   id: number
   client: TelegramBot
   shortcut?: Shortcut,
-  data?: any
+  data?: any,
+  final?: Transaction
 }
 
 type Event = { type: 'ANSWER', msg: Message }
@@ -39,12 +43,41 @@ const machine = createMachine<Context, Event>({
         data: (ctx) => ({ id: ctx.id, client: ctx.client, shortcut: ctx.shortcut }),
         onDone: {
           actions: assign({ data: (ctx, { data }) => data }),
+          target: 'confirm'
+        }
+      }
+    },
+    confirm: {
+      entry: assign<Context, Event>({
+        final: ({ data }) => ({
+          type: 'Transaction',
+          date: formatDate(new Date()),
+          flag: '*',
+          narration: data.narration!,
+          postings: data.postings,
+          meta: {}
+        } as Transaction)
+      }),
+      invoke: {
+        id: 'askConfirm',
+        src: askConfirm,
+        autoForward: true,
+        data: (ctx) => ({ id: ctx.id, client: ctx.client, question: confirmTransaction(ctx.final!) }),
+        onDone: {
+          actions: async ({ client, id, final }) => {
+            try {
+              await putEntries([final!])
+              await client.sendMessage(id, '✅ All done!', DEFAULT_KEYBOARD)
+            } catch (err) {
+              console.error(err)
+              await client.sendMessage(id, '❗️ Unexpected error', DEFAULT_KEYBOARD)
+            }
+          },
           target: 'done'
         }
       }
     },
     done: {
-      entry: ({ id, client, ...rest }) => client.sendMessage(id, inspect(rest), DEFAULT_KEYBOARD),
       type: 'final'
     }
   }

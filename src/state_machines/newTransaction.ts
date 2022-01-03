@@ -114,7 +114,7 @@ export default (msg: Message, client: TelegramBot) => {
   return service
 }
 
-function confirmTransaction ({ payee, narration, postings }: Transaction) {
+export function confirmTransaction ({ payee, narration, postings }: Transaction) {
   let r = `🧾 ${payee ? `*${escape(payee!)}* ${escape(narration)}` : `*${escape(narration)}*`}\n\n`
   r += postings
     .map(({ account, amount }) => `_${escape(account)}_\`\t${escape(amount)}\``)
