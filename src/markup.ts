@@ -1,6 +1,6 @@
 import { ParseMode } from 'node-telegram-bot-api'
 import { ACCOUNTS } from './app'
-import { CANCEL, CONFIRM, DONE, GET_ERRORS, NEW_BALANCE, NEW_NOTE, NEW_TRANSACTION } from './consts'
+import { CANCEL, CONFIRM, DONE, GET_ERRORS, NEW_BALANCE, NEW_NOTE, NEW_TRANSACTION, USE_SHORTCUT } from './consts'
 
 export const PARSE_MK = { parse_mode: 'MarkdownV2' as ParseMode }
 
@@ -9,7 +9,8 @@ export const DEFAULT_KEYBOARD = {
     resize_keyboard: true,
     keyboard: [
       [{ text: NEW_TRANSACTION }],
-      [{ text: NEW_BALANCE }, { text: NEW_NOTE }, { text: GET_ERRORS }]
+      [{ text: NEW_BALANCE }, { text: NEW_NOTE }, { text: GET_ERRORS }],
+      [{ text: USE_SHORTCUT }]
     ]
   }
 }
