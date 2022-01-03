@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+### Added
+* Shortcuts can be defined using a `shortcuts.json` file. Shortcuts allow users
+  to define standard conversations in order to quickly build predefined
+  transactions.
+
 ## 0.1.0
 ### Added
 
