@@ -1,0 +1,46 @@
+{
+  "$schema": "src/shortcuts/shortcuts.schema.json",
+  "shortcuts": [
+    {
+      "name": "Coffee",
+      "icon": "☕",
+      "narration": "",
+      "payee": "Coffee",
+      "script": [
+        { "var": "$cost", "type": "amount", "question": "💶 Amount" }
+      ],
+      "postings": [
+        { "account": "Expenses:Food:Coffee", "amount": "$cost" },
+        { "account": "Attivo:Liquido:Cash", "amount": "-$cost" }
+      ]
+    },
+    {
+      "name": "Alcohol",
+      "icon": "🍺",
+      "narration": "Alcohol",
+      "payee": "ask",
+      "script": [
+        { "var": "$cost", "type": "amount", "question": "💶 Amount" },
+        { "var": "$account", "type": "account", "question": "💳 Payment method", "filter": "Assets:" }
+      ],
+      "postings": [
+        { "account": "Expenses:Food:Alcohol", "amount": "$cost" },
+        { "account": "$account", "amount": "-$cost" }
+      ]
+    },
+    {
+      "name": "Tram ticket",
+      "icon": "🚆",
+      "narration": "ask",
+      "payee": "Transport authority",
+      "script": [
+        { "var": "$cost", "type": "amount", "question": "💶 Amount" },
+        { "var": "$account", "type": "account", "question": "💳 Payment method", "filter": "Assets:" }
+      ],
+      "postings": [
+        { "account": "Expenses:Transport:Tram", "amount": "$cost" },
+        { "account": "$account", "amount": "-$cost" }
+      ]
+    }
+  ]
+}

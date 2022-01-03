@@ -34,6 +34,42 @@ for the beancount CLI tools.
   none is provided
 * `SHORTCUTS_FILE`: your shortcuts file location. Defaults to `./shortcuts.json`
 
+## Shortcuts
+Shortcuts allow you to define custom dialogues that help users quickly create
+a transaction. This is most useful with frequent kinds of transactions, such as
+coffee, groceries, transportation, etc.
+
+Shortcuts are loaded at startup from `SHORTCUTS_FILE`, a JSON file that conforms
+to the [schema](./src/shortcuts/shortcuts.schema.json). You can read
+[the example file](./example.shortcuts.json) for some ideas.
+
+A shortcut is a JSON object with the following properties:
+```jsonc
+{
+  "name": "Coffee", // The name of this shortcut
+  "icon": "☕", // An emoji to represent this shortcut
+  "narration": "", // Can be a custom string or 'ask' to prompt the user to provide it
+  "payee": "Coffee", // Can be a custom string, 'ask' or 'ignore'
+  "script": [ // Questions that will be asked to the user
+    { 
+      "var": "$cost", // Defines a variable $cost
+      "type": "amount", // Can be 'amount' or 'account'
+      "question": "💶 Amount" // The custom question that will be asked to the user
+    },
+    { 
+      "var": "$account",
+      "type": "account",
+      "question": "💳 Payment method",
+      "filter": "Assets:" // Only accounts that start with this value will be show to the user
+    }
+  ],
+  "postings": [ // The postings that will constitute the transaction
+    { "account": "Expenses:Food:Coffee", "amount": "$cost" },
+    { "account": "$account", "amount": "-$cost" }
+  ]
+}
+```
+
 ## [License](./LICENSE)
 
     Copyright (C) 2021 Alberto Coscia
