@@ -1,0 +1,188 @@
+{
+  "$ref": "#/definitions/ShortcutsFile",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "ShortcutsFile": {
+      "additionalProperties": false,
+      "properties": {
+        "shortcuts": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "allowMorePostings": {
+                "type": "boolean"
+              },
+              "icon": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "narration": {
+                "type": "string"
+              },
+              "postings": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "account": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "additionalProperties": false,
+                          "properties": {
+                            "type": {
+                              "const": "var",
+                              "type": "string"
+                            },
+                            "var": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "var"
+                          ],
+                          "type": "object"
+                        },
+                        {
+                          "additionalProperties": false,
+                          "properties": {
+                            "expr": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "const": "evaluate",
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "expr"
+                          ],
+                          "type": "object"
+                        }
+                      ]
+                    },
+                    "amount": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "additionalProperties": false,
+                          "properties": {
+                            "type": {
+                              "const": "var",
+                              "type": "string"
+                            },
+                            "var": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "var"
+                          ],
+                          "type": "object"
+                        },
+                        {
+                          "additionalProperties": false,
+                          "properties": {
+                            "expr": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "const": "evaluate",
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "expr"
+                          ],
+                          "type": "object"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "account",
+                    "amount"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "script": {
+                "items": {
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "question": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "const": "account",
+                          "type": "string"
+                        },
+                        "var": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "var",
+                        "type",
+                        "question"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "question": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "const": "amount",
+                          "type": "string"
+                        },
+                        "var": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "var",
+                        "type",
+                        "question"
+                      ],
+                      "type": "object"
+                    }
+                  ]
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "name",
+              "icon",
+              "narration",
+              "script",
+              "postings",
+              "allowMorePostings"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "shortcuts"
+      ],
+      "type": "object"
+    }
+  }
+}
