@@ -6,6 +6,7 @@ import { isAmount, parseAmount } from '../utils'
 type Context = {
   id: number
   client: TelegramBot
+  question?: string
   final?: string
 }
 
@@ -21,7 +22,10 @@ export default createMachine<Context, Event>({
   initial: 'amount',
   states: {
     amount: {
-      entry: ({ client, id }) => client.sendMessage(id, '💶 Amount', CANCEL_KEYBOARD),
+      entry: ({ client, id, question }) => {
+        const msg = question || '💶 Amount'
+        client.sendMessage(id, msg, CANCEL_KEYBOARD)
+      },
       on: {
         ANSWER: [
           {

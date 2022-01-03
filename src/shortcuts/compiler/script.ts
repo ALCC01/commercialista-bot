@@ -14,7 +14,7 @@ const questionToState = (q: ShortcutQuestion, next: string): [string, StateNode]
         id: 'askAmount',
         src: askAmount,
         autoForward: true,
-        data: (ctx) => ({ id: ctx.id, client: ctx.client }),
+        data: (ctx) => ({ id: ctx.id, client: ctx.client, question: q.question }),
         onDone: {
           actions: assign<Context, DoneInvokeEvent<any>>({
             variables: (ctx, { data }) => ({ ...ctx.variables, ...{ [q.var]: data } })
@@ -31,7 +31,7 @@ const questionToState = (q: ShortcutQuestion, next: string): [string, StateNode]
         id: 'askAccount',
         src: askAccount,
         autoForward: true,
-        data: (ctx) => ({ id: ctx.id, client: ctx.client }),
+        data: (ctx) => ({ id: ctx.id, client: ctx.client, question: q.question }),
         onDone: {
           actions: assign<Context, DoneInvokeEvent<any>>({
             variables: (ctx, { data }) => ({ ...ctx.variables, ...{ [q.var]: data } })

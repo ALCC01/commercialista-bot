@@ -7,6 +7,7 @@ type Context = {
   id: number
   client: TelegramBot
   doneAllowed: boolean
+  question?: string
   final?: string
 }
 
@@ -22,7 +23,10 @@ export default createMachine<Context, Event>({
   initial: 'account',
   states: {
     account: {
-      entry: ({ client, id, doneAllowed }) => client.sendMessage(id, doneAllowed ? `💳 Account (or ${DONE})` : '💳 Account', accountsKeyboard(doneAllowed)),
+      entry: ({ client, id, doneAllowed, question }) => {
+        const msg = question || (doneAllowed ? `💳 Account (or ${DONE})` : '💳 Account')
+        client.sendMessage(id, msg, accountsKeyboard(doneAllowed))
+      },
       on: {
         ANSWER: [
           {
