@@ -31,7 +31,7 @@ const questionToState = (q: ShortcutQuestion, next: string): [string, StateNode]
         id: 'askAccount',
         src: askAccount,
         autoForward: true,
-        data: (ctx) => ({ id: ctx.id, client: ctx.client, question: q.question }),
+        data: (ctx) => ({ id: ctx.id, client: ctx.client, question: q.question, filter: q.filter }),
         onDone: {
           actions: assign<Context, DoneInvokeEvent<any>>({
             variables: (ctx, { data }) => ({ ...ctx.variables, ...{ [q.var]: data } })

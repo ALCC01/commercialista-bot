@@ -4,12 +4,15 @@
 ### Added
 * Shortcuts can be defined using a `shortcuts.json` file. Shortcuts allow users
   to define standard conversations in order to quickly build predefined
-  transactions.
+  transactions
+* Shortcuts can provide a narration and a payee or let them be defined by the
+  user
+* Shortcuts can filter the accounts suggested to a user
 
 ### Changed
 * The first occurrence of `:` is used to split an answer into a payee and a
   narration (eg `Payee: narration`). When no colon is found, all the string is
-  treated as a narration.
+  treated as a narration
 
 ## 0.1.0
 ### Added

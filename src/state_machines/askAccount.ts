@@ -9,6 +9,7 @@ type Context = {
   doneAllowed: boolean
   question?: string
   final?: string
+  filter?: string
 }
 
 type Event = { type: 'ANSWER', msg: Message }
@@ -23,9 +24,9 @@ export default createMachine<Context, Event>({
   initial: 'account',
   states: {
     account: {
-      entry: ({ client, id, doneAllowed, question }) => {
+      entry: ({ client, id, doneAllowed, question, filter }) => {
         const msg = question || (doneAllowed ? `💳 Account (or ${DONE})` : '💳 Account')
-        client.sendMessage(id, msg, accountsKeyboard(doneAllowed))
+        client.sendMessage(id, msg, accountsKeyboard(doneAllowed, filter))
       },
       on: {
         ANSWER: [
