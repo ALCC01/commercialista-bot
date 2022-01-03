@@ -10,11 +10,13 @@ export type ShortcutQuestion =
   { var: string, type: 'account', question: string } |
   { var: string, type: 'amount', question: string }
 
+export type ShortcutNarration = string | 'ask'
+
 export type Shortcut = {
   name: string
   icon: string
   // payee: string | 'ask' | 'ignore'
-  narration: string | 'ask'
+  narration: ShortcutNarration
   script: ShortcutQuestion[]
   postings: ShortcutPosting[]
   allowMorePostings: boolean
