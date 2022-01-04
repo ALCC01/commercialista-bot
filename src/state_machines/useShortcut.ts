@@ -70,7 +70,6 @@ const machine = createMachine<Context, Event>({
               await putEntries([final!])
               await client.sendMessage(id, '✅ All done!', DEFAULT_KEYBOARD)
             } catch (err) {
-              console.error(err)
               await client.sendMessage(id, '❗️ Unexpected error', DEFAULT_KEYBOARD)
             }
           },

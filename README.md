@@ -34,6 +34,7 @@ for the beancount CLI tools.
   none is provided by the user. Defaults to the file's operating currency or to
   EUR.
 * `SHORTCUTS_FILE`: your shortcuts file location. Defaults to `./shortcuts.json`
+* `LOG_LEVEL`: sets the [level](logs) to display logs at. Defaults to `info`.
 
 ## Shortcuts
 Shortcuts allow you to define custom dialogues that help users quickly create
@@ -94,3 +95,4 @@ A shortcut is a JSON object with the following properties:
 [dotenv]: https://www.npmjs.com/package/dotenv
 [raw]: https://t.me/RawDataBot
 [commodities]: https://beancount.github.io/docs/beancount_language_syntax.html#commodities-currencies
+[logs]: https://github.com/npm/npmlog#loglevelprefix-message-

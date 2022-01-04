@@ -30,7 +30,6 @@ const machine = createMachine<Context, Event>({
         },
         onError: {
           actions: ({ id, client }, { data }) => {
-            console.error(data)
             client.sendMessage(id, '❗️ Unexpected error', DEFAULT_KEYBOARD)
           },
           target: 'done'

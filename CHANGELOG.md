@@ -8,6 +8,7 @@
 * Shortcuts can provide a narration and a payee or let them be defined by the
   user
 * Shortcuts can filter the accounts suggested to a user
+* Added logging. Logs can be filtered using `LOG_LEVEL` (defaults to info)
 
 ### Changed
 * The first occurrence of `:` is used to split an answer into a payee and a

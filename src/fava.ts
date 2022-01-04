@@ -1,4 +1,6 @@
 import axios from 'axios'
+import logger from 'npmlog'
+
 const ENDPOINT = process.env.FAVA_PRIVATE! + '/api'
 export const FRONTEND = process.env.FAVA_PUBLIC || process.env.FAVA_PRIVATE!
 
@@ -58,7 +60,7 @@ export async function loadLedgerData () {
       raw
     }
   } catch (err) {
-    console.log(err)
+    logger.error('fatal', 'Failed to load ledger data from Fava', (err as any).message)
     process.exit(-1)
   }
 }
@@ -66,23 +68,40 @@ export async function loadLedgerData () {
 type Entry = Transaction | Balance | Note
 
 export async function putEntries (e: Entry[]) {
-  const a = await axios({
-    method: 'PUT',
-    url: ENDPOINT + '/add_entries',
-    data: { entries: e }
-  })
+  try {
+    const a = await axios({
+      method: 'PUT',
+      url: ENDPOINT + '/add_entries',
+      data: { entries: e }
+    })
 
-  const { success, error } = await a.data
-  if (!success) throw new Error('Failed PUT /add_entries: ' + error)
+    const { success, error } = await a.data
+    if (!success) {
+      logger.error('fava', 'Failed PUT /add_entries', error)
+      throw new Error('Failed PUT /add_entries: ' + error)
+    }
+  } catch (err) {
+    logger.error('fava', 'Failed PUT /add_entries', (err as any).message)
+    throw new Error('Failed PUT /add_entries: ' + (err as any).message)
+  }
 }
 
 export async function getErrors (): Promise<number> {
-  const a = await axios({
-    method: 'GET',
-    url: ENDPOINT + '/errors'
-  })
+  try {
+    const a = await axios({
+      method: 'GET',
+      url: ENDPOINT + '/errors'
+    })
 
-  const { success, error, data } = await a.data
-  if (!success) throw new Error('Failed PUT /add_entries: ' + error)
-  return data as number
+    const { success, error, data } = await a.data
+
+    if (!success) {
+      logger.error('fava', 'Failed GET /errors', error)
+      throw new Error('Failed GET /errors: ' + error)
+    }
+    return data as number
+  } catch (err) {
+    logger.error('fava', 'Failed GET /errors', (err as any).message)
+    throw new Error('Failed GET /errors: ' + (err as any).message)
+  }
 }

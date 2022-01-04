@@ -1,6 +1,7 @@
 import TelegramBot from 'node-telegram-bot-api'
 import { CANCEL, GET_ERRORS, NEW_BALANCE, NEW_NOTE, NEW_TRANSACTION, USE_SHORTCUT } from './consts'
 import { DEFAULT_KEYBOARD, NO_KEYBOARD } from './markup'
+import logger from 'npmlog'
 import newTransaction from './state_machines/newTransaction'
 import newBalance from './state_machines/newBalance'
 import newNote from './state_machines/newNote'
@@ -20,6 +21,9 @@ export default class Bot {
     this._client = new TelegramBot(token, { polling: true })
     this._allowedIds = allowedIds
     this._machines = {}
+
+    this._client.on('error', err => logger.error('bot', 'Bot error:', err.message))
+    this._client.on('polling_error', err => logger.error('bot', 'Polling error: ', err.message))
   }
 
   isAllowed (id: number) {
@@ -28,7 +32,10 @@ export default class Bot {
 
   start () {
     this._client.on('text', msg => {
-      if (!this.isAllowed(msg.chat.id)) return this._client.sendMessage(msg.chat.id, '⛔ User not allowed', NO_KEYBOARD)
+      if (!this.isAllowed(msg.chat.id)) {
+        logger.info('bot', `User ${msg.chat.id} (${msg.chat.username}) tried using this bot`)
+        return this._client.sendMessage(msg.chat.id, '⛔ User not allowed', NO_KEYBOARD)
+      }
 
       if (msg.text === CANCEL || msg.text === '/cancel') {
         this._machines[msg.chat.id] = undefined
@@ -62,7 +69,7 @@ export default class Bot {
             return this._client.sendMessage(msg.chat.id, '👋 Hi there!', DEFAULT_KEYBOARD)
         }
       } catch (err) {
-        console.error(err)
+        logger.error('bot', 'Unexpected error processing a message:', (err as any).message)
         this._machines[msg.chat.id] = undefined
         this._client.sendMessage(msg.chat.id, '❗️ Unexpected error', DEFAULT_KEYBOARD)
       }
