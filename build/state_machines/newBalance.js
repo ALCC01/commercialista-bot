@@ -73,7 +73,6 @@ const machine = (0, xstate_1.createMachine)({
                             yield client.sendMessage(id, '✅ All done!', markup_1.DEFAULT_KEYBOARD);
                         }
                         catch (err) {
-                            console.error(err);
                             yield client.sendMessage(id, '❗️ Unexpected error', markup_1.DEFAULT_KEYBOARD);
                         }
                     }),

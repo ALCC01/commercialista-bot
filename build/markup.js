@@ -9,7 +9,8 @@ exports.DEFAULT_KEYBOARD = {
         resize_keyboard: true,
         keyboard: [
             [{ text: consts_1.NEW_TRANSACTION }],
-            [{ text: consts_1.NEW_BALANCE }, { text: consts_1.NEW_NOTE }, { text: consts_1.GET_ERRORS }]
+            [{ text: consts_1.NEW_BALANCE }, { text: consts_1.NEW_NOTE }, { text: consts_1.GET_ERRORS }],
+            [{ text: consts_1.USE_SHORTCUT }]
         ]
     }
 };
@@ -38,12 +39,12 @@ exports.CANCEL_OR_DONE_KEYBOARD = {
     }
 };
 exports.NO_KEYBOARD = { reply_markup: { remove_keyboard: true } };
-const accountsKeyboard = (done) => ({
+const accountsKeyboard = (done, filter) => ({
     reply_markup: {
         resize_keyboard: true,
         keyboard: [
             done ? [{ text: consts_1.DONE }, { text: consts_1.CANCEL }] : [{ text: consts_1.CANCEL }],
-            ...(app_1.ACCOUNTS.map(e => [{ text: e }]))
+            ...(app_1.ACCOUNTS.filter(e => e.startsWith(filter || '')).map(e => [{ text: e }]))
         ]
     }
 });

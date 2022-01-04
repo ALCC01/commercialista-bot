@@ -13,43 +13,50 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const xstate_1 = require("xstate");
-const fava_1 = require("../fava");
 const markup_1 = require("../markup");
-const utils_1 = require("../utils");
-const askAccount_1 = __importDefault(require("./askAccount"));
+const askShortcut_1 = __importDefault(require("./askShortcut"));
+const fava_1 = require("../fava");
 const askConfirm_1 = __importDefault(require("./askConfirm"));
+const newTransaction_1 = require("./newTransaction");
+const utils_1 = require("../utils");
+const shortcuts_1 = require("../shortcuts");
 const machine = (0, xstate_1.createMachine)({
-    id: 'newNote',
-    initial: 'account',
+    id: 'useShortcut',
+    initial: 'choose',
     states: {
-        account: {
+        choose: {
             invoke: {
-                id: 'askAccount',
-                src: askAccount_1.default,
+                id: 'askShortcut',
+                src: askShortcut_1.default,
                 autoForward: true,
                 data: (ctx) => ({ id: ctx.id, client: ctx.client, doneAllowed: false }),
                 onDone: {
-                    actions: (0, xstate_1.assign)({ account: (ctx, { data }) => data }),
-                    target: 'comment'
+                    actions: (0, xstate_1.assign)({ shortcut: (ctx, { data }) => data }),
+                    target: 'run'
                 }
             }
         },
-        comment: {
-            entry: ({ client, id }) => client.sendMessage(id, '🗒 Note', markup_1.CANCEL_KEYBOARD),
-            on: {
-                ANSWER: {
-                    actions: (0, xstate_1.assign)({ comment: (ctx, { msg: { text } }) => text }),
+        run: {
+            invoke: {
+                id: 'runShortcut',
+                src: (ctx) => (0, shortcuts_1.getShortcutMachine)(ctx.shortcut.icon),
+                autoForward: true,
+                data: (ctx) => ({ id: ctx.id, client: ctx.client, shortcut: ctx.shortcut }),
+                onDone: {
+                    actions: (0, xstate_1.assign)({ data: (ctx, { data }) => data }),
                     target: 'confirm'
                 }
             }
         },
         confirm: {
             entry: (0, xstate_1.assign)({
-                final: ctx => ({
-                    type: 'Note',
+                final: ({ data }) => ({
+                    type: 'Transaction',
                     date: (0, utils_1.formatDate)(new Date()),
-                    account: ctx.account,
-                    comment: ctx.comment,
+                    flag: '*',
+                    narration: data.narration,
+                    payee: data.payee,
+                    postings: data.postings,
                     meta: {}
                 })
             }),
@@ -57,7 +64,7 @@ const machine = (0, xstate_1.createMachine)({
                 id: 'askConfirm',
                 src: askConfirm_1.default,
                 autoForward: true,
-                data: (ctx) => ({ id: ctx.id, client: ctx.client, question: confirmNote(ctx.final) }),
+                data: (ctx) => ({ id: ctx.id, client: ctx.client, question: (0, newTransaction_1.confirmTransaction)(ctx.final) }),
                 onDone: {
                     actions: ({ client, id, final }) => __awaiter(void 0, void 0, void 0, function* () {
                         try {
@@ -85,7 +92,4 @@ exports.default = (msg, client) => {
     const service = (0, xstate_1.interpret)(machine.withContext(context));
     service.start();
     return service;
-};
-const confirmNote = ({ account, comment }) => {
-    return `🗒 *${(0, utils_1.escape)(account)}*\n\n${(0, utils_1.escape)(comment)}\n\n*Confirm?*`;
 };

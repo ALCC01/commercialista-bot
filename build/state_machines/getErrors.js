@@ -22,7 +22,6 @@ const machine = (0, xstate_1.createMachine)({
                 },
                 onError: {
                     actions: ({ id, client }, { data }) => {
-                        console.error(data);
                         client.sendMessage(id, '❗️ Unexpected error', markup_1.DEFAULT_KEYBOARD);
                     },
                     target: 'done'

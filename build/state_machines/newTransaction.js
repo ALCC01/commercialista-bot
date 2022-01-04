@@ -12,6 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.confirmTransaction = void 0;
 const xstate_1 = require("xstate");
 const fava_1 = require("../fava");
 const markup_1 = require("../markup");
@@ -19,15 +20,22 @@ const utils_1 = require("../utils");
 const askAccount_1 = __importDefault(require("./askAccount"));
 const askAmount_1 = __importDefault(require("./askAmount"));
 const askConfirm_1 = __importDefault(require("./askConfirm"));
+const askNarration_1 = __importDefault(require("./askNarration"));
 const machine = (0, xstate_1.createMachine)({
     id: 'newTransaction',
     initial: 'narration',
     states: {
         narration: {
-            entry: ({ client, id }) => client.sendMessage(id, '🧾 Narration', markup_1.NO_KEYBOARD),
-            on: {
-                ANSWER: {
-                    actions: (0, xstate_1.assign)({ narration: (ctx, { msg }) => msg.text }),
+            invoke: {
+                id: 'askNarration',
+                src: askNarration_1.default,
+                autoForward: true,
+                data: (ctx) => ({ id: ctx.id, client: ctx.client, askPayee: true, askNarration: true }),
+                onDone: {
+                    actions: (0, xstate_1.assign)({
+                        narration: (ctx, { data }) => data.narration,
+                        payee: (ctx, { data }) => data.payee
+                    }),
                     target: 'account'
                 }
             }
@@ -72,6 +80,7 @@ const machine = (0, xstate_1.createMachine)({
                     date: (0, utils_1.formatDate)(new Date()),
                     flag: '*',
                     narration: ctx.narration,
+                    payee: ctx.payee,
                     postings: ctx.postings,
                     meta: {}
                 })
@@ -88,7 +97,6 @@ const machine = (0, xstate_1.createMachine)({
                             yield client.sendMessage(id, '✅ All done!', markup_1.DEFAULT_KEYBOARD);
                         }
                         catch (err) {
-                            console.error(err);
                             yield client.sendMessage(id, '❗️ Unexpected error', markup_1.DEFAULT_KEYBOARD);
                         }
                     }),
@@ -119,3 +127,4 @@ function confirmTransaction({ payee, narration, postings }) {
     r += '\n*Confirm?*';
     return r;
 }
+exports.confirmTransaction = confirmTransaction;

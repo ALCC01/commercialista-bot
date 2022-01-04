@@ -12,7 +12,10 @@ exports.default = (0, xstate_1.createMachine)({
     initial: 'amount',
     states: {
         amount: {
-            entry: ({ client, id }) => client.sendMessage(id, '💶 Amount', markup_1.CANCEL_KEYBOARD),
+            entry: ({ client, id, question }) => {
+                const msg = question || '💶 Amount';
+                client.sendMessage(id, msg, markup_1.CANCEL_KEYBOARD);
+            },
             on: {
                 ANSWER: [
                     {

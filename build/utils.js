@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.escape = exports.formatDate = exports.isAmount = exports.parseAmount = exports.getEntityText = void 0;
+exports.chunks = exports.escape = exports.formatDate = exports.isAmount = exports.parseAmount = exports.getEntityText = void 0;
 const getEntityText = (text, { offset, length }, exclude = false) => text.substring(exclude ? offset + 1 : offset, offset + length);
 exports.getEntityText = getEntityText;
 const parseCurrency = ({ text, entities }) => {
@@ -28,3 +28,8 @@ exports.formatDate = formatDate;
 const ILLEGAL_CHARS = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'];
 const escape = (text) => ILLEGAL_CHARS.reduce((txt, char) => txt.replaceAll(char, `\\${char}`), text);
 exports.escape = escape;
+const chunks = (a, size) => Array(Math.ceil(a.length / size))
+    .fill(0)
+    .map((_, i) => i * size)
+    .map(begin => a.slice(begin, begin + size));
+exports.chunks = chunks;

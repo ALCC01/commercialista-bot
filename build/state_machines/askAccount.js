@@ -12,7 +12,10 @@ exports.default = (0, xstate_1.createMachine)({
     initial: 'account',
     states: {
         account: {
-            entry: ({ client, id, doneAllowed }) => client.sendMessage(id, doneAllowed ? `💳 Account (or ${consts_1.DONE})` : '💳 Account', (0, markup_1.accountsKeyboard)(doneAllowed)),
+            entry: ({ client, id, doneAllowed, question, filter }) => {
+                const msg = question || (doneAllowed ? `💳 Account (or ${consts_1.DONE})` : '💳 Account');
+                client.sendMessage(id, msg, (0, markup_1.accountsKeyboard)(doneAllowed, filter));
+            },
             on: {
                 ANSWER: [
                     {
