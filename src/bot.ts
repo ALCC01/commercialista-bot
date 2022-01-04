@@ -7,6 +7,7 @@ import newBalance from './state_machines/newBalance'
 import newNote from './state_machines/newNote'
 import getErrors from './state_machines/getErrors'
 import useShortcut from './state_machines/useShortcut'
+import commands from './commands'
 
 type BotOptions = {
   allowedIds: number[]
@@ -24,6 +25,8 @@ export default class Bot {
 
     this._client.on('error', err => logger.error('bot', 'Bot error:', err.message))
     this._client.on('polling_error', err => logger.error('bot', 'Polling error: ', err.message))
+
+    this._client.setMyCommands(commands)
   }
 
   isAllowed (id: number) {

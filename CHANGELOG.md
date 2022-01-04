@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+### Added
+* The bot now automatically updates its command list on startup. 
+
 ## 0.2.0
 ### Added
 * Shortcuts can be defined using a `shortcuts.json` file. Shortcuts allow users
