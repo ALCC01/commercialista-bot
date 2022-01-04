@@ -13,6 +13,8 @@
 * The first occurrence of `:` is used to split an answer into a payee and a
   narration (eg `Payee: narration`). When no colon is found, all the string is
   treated as a narration
+* The bot now respects the beancount file operating currency if 
+  `DEFAULT_CURRENCY` is not provided
 
 ## 0.1.0
 ### Added

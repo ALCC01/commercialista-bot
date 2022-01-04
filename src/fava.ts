@@ -37,13 +37,30 @@ export type Note = {
   comment: string
 }
 
-export async function loadAccounts () {
+export type LedgerData = {
+  accounts: string[]
+  operatingCurrency: string[],
+  raw: any
+}
+
+export async function loadLedgerData () {
   const { data } = await axios({
     method: 'GET',
     url: process.env.FAVA_PRIVATE! + '/income_statement/'
   })
 
-  return JSON.parse(data.match(/<script .+ id="ledger-data">(.+)<\/script>/)[1]).accounts as string[]
+  try {
+    const raw = JSON.parse(data.match(/<script .+ id="ledger-data">(.+)<\/script>/)[1])
+
+    return {
+      accounts: raw.accounts,
+      operatingCurrency: raw.options.operating_currency,
+      raw
+    }
+  } catch (err) {
+    console.log(err)
+    process.exit(-1)
+  }
 }
 
 type Entry = Transaction | Balance | Note

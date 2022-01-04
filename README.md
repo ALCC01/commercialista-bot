@@ -31,7 +31,8 @@ for the beancount CLI tools.
 * `ALLOWED_USER_IDS`: comma-separated list of Telegram user IDs who are allowed
   to use the bot (get yours from [@RawDataBot][raw])
 * `DEFAULT_CURRENCY`: the default [currency/commodity][commodities] to use when
-  none is provided
+  none is provided by the user. Defaults to the file's operating currency or to
+  EUR.
 * `SHORTCUTS_FILE`: your shortcuts file location. Defaults to `./shortcuts.json`
 
 ## Shortcuts
