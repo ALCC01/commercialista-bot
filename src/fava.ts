@@ -45,7 +45,7 @@ export type LedgerData = {
   raw: any
 }
 
-export async function loadLedgerData () {
+export async function loadLedgerData (): Promise<LedgerData> {
   const { data } = await axios({
     method: 'GET',
     url: process.env.FAVA_PRIVATE! + '/income_statement/'

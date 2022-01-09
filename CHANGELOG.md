@@ -2,7 +2,10 @@
 
 ## Unreleased
 ### Added
-* The bot now automatically updates its command list on startup. 
+* The bot now automatically updates its command list on startup.
+
+### Changed
+* Accounts are now suggested in alphabetical order.
 
 ## 0.2.0
 ### Added

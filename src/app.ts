@@ -19,7 +19,7 @@ async function start () {
 
   logger.info('startup', `Fava instance is ${process.env.FAVA_PRIVATE}`)
   const ledgerData = await loadLedgerData()
-  ACCOUNTS = ledgerData.accounts
+  ACCOUNTS = ledgerData.accounts.sort((a, b) => a.localeCompare(b))
   logger.verbose('startup', `Found ${ACCOUNTS.length} accounts`)
 
   process.env.DEFAULT_CURRENCY = process.env.DEFAULT_CURRENCY || ledgerData.operatingCurrency[0] || 'EUR'
