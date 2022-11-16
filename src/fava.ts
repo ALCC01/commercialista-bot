@@ -18,6 +18,8 @@ export type Transaction = {
   payee?: string
   narration: string
   postings: Posting[]
+  links: string[]
+  tags: string[]
 }
 
 export type Balance = {

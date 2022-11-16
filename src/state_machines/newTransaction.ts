@@ -81,7 +81,9 @@ const machine = createMachine<Context, Event>({
           narration: ctx.narration!,
           payee: ctx.payee,
           postings: ctx.postings,
-          meta: {}
+          meta: {},
+          tags: [],
+          links: []
         } as Transaction)
       }),
       invoke: {
