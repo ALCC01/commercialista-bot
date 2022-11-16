@@ -20,6 +20,7 @@ const guards: Record<string, ConditionPredicate<Context, Event>> = {
 export default createMachine<Context, Event>({
   id: 'askAmount',
   initial: 'amount',
+  predictableActionArguments: true,
   states: {
     amount: {
       entry: ({ client, id, question }) => {

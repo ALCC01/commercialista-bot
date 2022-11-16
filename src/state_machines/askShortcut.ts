@@ -19,6 +19,7 @@ const guards: Record<string, ConditionPredicate<Context, Event>> = {
 export default createMachine<Context, Event>({
   id: 'askShortcut',
   initial: 'shortcut',
+  predictableActionArguments: true,
   states: {
     shortcut: {
       entry: ({ client, id }) => client.sendMessage(id, '💨 Choose a shortcut', shortcutsKeyboard()),

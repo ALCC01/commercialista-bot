@@ -23,6 +23,7 @@ type Event = { type: 'ANSWER', msg: Message }
 const machine = createMachine<Context, Event>({
   id: 'newTransaction',
   initial: 'narration',
+  predictableActionArguments: true,
   states: {
     narration: {
       invoke: {
@@ -117,7 +118,7 @@ export default (msg: Message, client: TelegramBot) => {
     postings: []
   }
 
-  const service = interpret<Context, any, Event>(machine.withContext(context))
+  const service = interpret<Context, any, Event, any, any>(machine.withContext(context))
 
   service.start()
   return service

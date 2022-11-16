@@ -17,6 +17,7 @@ type Event = { type: 'ANSWER', msg: Message }
 export default createMachine<Context, Event>({
   id: 'askNarration',
   initial: 'narration',
+  predictableActionArguments: true,
   states: {
     narration: {
       entry: ({ client, id, askPayee, askNarration }) => {

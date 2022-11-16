@@ -26,6 +26,7 @@ export const buildShortcut = (shortcut: Shortcut): CompiledShortcut => {
   const prototype: MachineConfig<Context, any, Event> = {
     id: shortcut.name,
     initial: 'narration',
+    predictableActionArguments: true,
     states: {
       done: {
         type: 'final',

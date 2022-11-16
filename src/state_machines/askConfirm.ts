@@ -20,6 +20,7 @@ const guards: Record<string, ConditionPredicate<Context, Event>> = {
 export default createMachine<Context, Event>({
   id: 'askConfirm',
   initial: 'confirm',
+  predictableActionArguments: true,
   states: {
     confirm: {
       entry: ({ client, id, question }) => client.sendMessage(id, question, { ...CONFIRM_KEYBOARD, ...PARSE_MK }),

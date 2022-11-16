@@ -22,6 +22,7 @@ type Event = { type: 'ANSWER', msg: Message }
 const machine = createMachine<Context, Event>({
   id: 'useShortcut',
   initial: 'choose',
+  predictableActionArguments: true,
   states: {
     choose: {
       invoke: {
@@ -91,7 +92,7 @@ export default (msg: Message, client: TelegramBot) => {
     client
   }
 
-  const service = interpret<Context, any, Event>(machine.withContext(context))
+  const service = interpret<Context, any, Event, any, any>(machine.withContext(context))
   service.start()
 
   return service
