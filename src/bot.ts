@@ -8,6 +8,7 @@ import newNote from './state_machines/newNote'
 import getErrors from './state_machines/getErrors'
 import useShortcut from './state_machines/useShortcut'
 import commands from './commands'
+import { Interpreter } from 'xstate'
 
 type BotOptions = {
   allowedIds: number[]
@@ -16,7 +17,7 @@ type BotOptions = {
 export default class Bot {
   _client: TelegramBot
   _allowedIds: number[]
-  _machines: { [key: number]: any }
+  _machines: { [key: number]: Interpreter<any, any, any> | undefined }
 
   constructor (token: string, { allowedIds }: BotOptions) {
     this._client = new TelegramBot(token, { polling: true })
@@ -46,9 +47,9 @@ export default class Bot {
       }
 
       try {
-        if (this._machines[msg.chat.id]) {
-          const state = this._machines[msg.chat.id].send({ type: 'ANSWER', msg })
-          if (state.done) this._machines[msg.chat.id] = undefined
+        if (this._machines[msg.chat.id] && !this._machines[msg.chat.id]!.state.done) {
+          const state = this._machines[msg.chat.id]!.send({ type: 'ANSWER', msg })
+          if (state!.done) this._machines[msg.chat.id] = undefined
           return
         }
 
