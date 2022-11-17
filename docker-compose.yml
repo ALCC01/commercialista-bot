@@ -1,0 +1,30 @@
+# This is a development configuration, not suitable for deployment
+
+version: "3.9"
+
+services:
+  fava:
+    image: yegle/fava:latest
+    restart: unless-stopped
+    ports:
+      - 5000:5000
+    volumes:
+      - ./fava:/bean
+    environment:
+      BEANCOUNT_FILE: ${FAVA_BEANCOUNT_FILE}
+
+  commercialista-bot:
+    build:
+      context: .
+      target: builder
+    command: npm run watch
+    restart: unless-stopped
+    volumes:
+      - .:/app:ro
+    environment:
+      - NTBA_FIX_319=1
+      - TELEGRAM_TOKEN
+      - ALLOWED_USER_IDS
+      - DEFAULT_CURRENCY=USD
+      - FAVA_PRIVATE
+      - FAVA_PUBLIC

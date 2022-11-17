@@ -1,6 +1,6 @@
 FROM node:lts-alpine as builder
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
 COPY package*.json ./
 RUN npm ci
@@ -8,13 +8,19 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
+RUN chown -R 1000:1000 /root/.npm
+USER node
+
 FROM node:lts-alpine
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
 COPY package*.json ./
 RUN npm ci --production
 
-COPY --from=builder /usr/src/app/build ./build
+COPY --from=builder /app/build ./build
+
+RUN chown -R 1000:1000 /root/.npm
+USER node
 
 CMD [ "npm", "start" ]
