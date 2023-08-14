@@ -54,7 +54,7 @@ export async function loadLedgerData (): Promise<LedgerData> {
   })
 
   try {
-    const raw = JSON.parse(data.match(/<script .+ id="ledger-data">(.+)<\/script>/)[1])
+    const raw = JSON.parse(data.match(/<script .+ id="ledger-data">({(.|\n)*})<\/script>\n\s{4}/)[1])
 
     return {
       accounts: raw.accounts,
