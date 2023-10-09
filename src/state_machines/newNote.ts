@@ -45,7 +45,7 @@ const machine = createMachine<Context, Event>({
     confirm: {
       entry: assign<Context, Event>({
         final: ctx => ({
-          type: 'Note',
+          t: 'Note',
           date: formatDate(new Date()),
           account: ctx.account!,
           comment: ctx.comment!,

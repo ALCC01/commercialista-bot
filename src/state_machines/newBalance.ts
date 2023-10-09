@@ -51,7 +51,7 @@ const machine = createMachine<Context, Event>({
         final: ctx => {
           const [number, currency] = ctx.amount!.split(' ')
           const final = {
-            type: 'Balance',
+            t: 'Balance',
             date: formatDate(new Date()),
             account: ctx.account!,
             amount: { number, currency },

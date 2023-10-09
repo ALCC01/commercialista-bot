@@ -51,7 +51,7 @@ const machine = createMachine<Context, Event>({
     confirm: {
       entry: assign<Context, Event>({
         final: ({ data }) => ({
-          type: 'Transaction',
+          t: 'Transaction',
           date: formatDate(new Date()),
           flag: '*',
           narration: data.narration!,
