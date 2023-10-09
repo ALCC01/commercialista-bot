@@ -11,7 +11,7 @@ export type Posting = {
 }
 
 export type Transaction = {
-  type: 'Transaction'
+  t: 'Transaction'
   date: string
   flag: '!' | '*'
   meta: {}
@@ -23,7 +23,7 @@ export type Transaction = {
 }
 
 export type Balance = {
-  type: 'Balance'
+  t: 'Balance'
   date: string
   meta: {}
   account: string
@@ -34,7 +34,7 @@ export type Balance = {
 }
 
 export type Note = {
-  type: 'Note'
+  t: 'Note'
   date: string
   meta: {}
   account: string
